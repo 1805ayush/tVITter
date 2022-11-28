@@ -15,7 +15,7 @@ exports.createPost = async(req,res)=>{
 
         const newPost = await Post.create(newPostData);
 
-        res.status(200).json({
+        res.status(201).json({
             success:true,
             post: newPost,
         })

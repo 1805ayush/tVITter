@@ -33,9 +33,18 @@ exports.register = async (req,res)=>{
 
         const newUser = await User.create(newUserData);
 
-        res.status(201).json({
+        const token = user.generateToken();
+
+        const options = {
+            expire: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            httpOnly: true
+        }
+
+        res.status(201).cookie("token",token,options).json({
             success: true,
-            user : newUser
+            user: newUser,
+            token,
+            message: "Welcome to tVITter"
         })
 
     } catch (error) {
@@ -75,13 +84,16 @@ exports.login = async (req,res)=>{
 
         const token = user.generateToken();
 
-        res.status(200).cookie("token",token).json({
+        const options = {
+            expire: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            httpOnly: true
+        }
+
+        res.status(200).cookie("token",token,options).json({
             success: true,
             user,
             token
         })
-
-
 
     } catch (error) {
         res.status(500).json({

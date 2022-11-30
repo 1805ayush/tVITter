@@ -1,9 +1,11 @@
 const Post = require("../models/posts");
+const User = require("../models/users");
 
-exports.createPost = async(req,res)=>{
+exports.createPost = async (req,res)=>{
 
     try {
         
+       
         const newPostData = {
             caption : req.body.caption,
             image:{
@@ -14,6 +16,13 @@ exports.createPost = async(req,res)=>{
         }
 
         const newPost = await Post.create(newPostData);
+
+        const user = await User.findById(req.user._id);
+
+        console.log(newPost._id);
+        user.posts.push(newPost._id);
+
+        await user.save();
 
         res.status(201).json({
             success:true,

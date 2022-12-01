@@ -31,7 +31,6 @@ const UserSchema = new Schema({
     },
     dob:{
         type: Date,
-        default: Date.now,
     },
     posts:[
         {

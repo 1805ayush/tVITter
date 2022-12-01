@@ -131,7 +131,7 @@ exports.followUser = async (req,res)=>{
 
             res.status(200).json({
                 success: true,
-                message: "User unfollowed!"
+                message: "User Unfollowed!"
             })
 
         }else{

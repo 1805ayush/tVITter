@@ -70,7 +70,7 @@ exports.deletePost = async(req,res)=>{
             message:"Post deleted."
         })
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: error.message,
         })
@@ -110,10 +110,33 @@ exports.likeAndUnlikePost = async (req, res)=>{
 
     } catch (error) {
         
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: error.message
         })
 
+    }
+}
+
+//get posts of following
+exports.postsOfFollowing = async(req,res)=>{
+    try {
+        const user = await User.findById(req.user._id);
+
+        const posts = await Post.find({
+            user: {
+                $in: user.following
+            }
+        })
+
+        return res.status(200).json({
+            success:true,
+            posts,
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        })
     }
 }

@@ -48,7 +48,7 @@ exports.register = async (req,res)=>{
         })
 
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: error.message,
         })
@@ -104,6 +104,26 @@ exports.login = async (req,res)=>{
     }
 }
 
+//logout user
+exports.logout = async (req,res)=>{
+    try {
+        
+        return res
+            .status(200)
+            .cookie("token",null,{expires: new Date(Date.now()),httpOnly: true})
+            .json({
+                success: true,
+                message: "Logged Out Successfully"
+            })
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        })
+    }
+}
+
 //follow user
 exports.followUser = async (req,res)=>{
     try {
@@ -129,7 +149,7 @@ exports.followUser = async (req,res)=>{
             await loggedInUser.save();
             await userToFollow.save();
 
-            res.status(200).json({
+            return res.status(200).json({
                 success: true,
                 message: "User Unfollowed!"
             })
@@ -141,7 +161,7 @@ exports.followUser = async (req,res)=>{
             await loggedInUser.save();
             await userToFollow.save();
 
-            res.status(200).json({
+            return res.status(200).json({
                 success: true,
                 message: "User Followed!"
             })

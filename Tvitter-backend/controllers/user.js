@@ -72,7 +72,7 @@ exports.login = async (req,res)=>{
             })
             return;
         }
-        const isMatch = await user.matchPassword({password});
+        const isMatch = await user.matchPassword(password);
 
         if(!isMatch){
             res.status(400).json({
@@ -101,6 +101,103 @@ exports.login = async (req,res)=>{
             message: error.message,
         })
         return;
+    }
+}
+
+//update password
+exports.updatePassword = async(req,res)=>{
+    try {
+        const user = await User.findById(req.user._id).select("+password");
+
+        const {oldPassword,newPassword} = req.body;
+
+        if(!oldPassword || !newPassword){
+            return res.status(404).json({
+                success: false,
+                message: "Please enter old and new  password"
+            })
+        }
+
+        if(oldPassword.length<6){
+            return res.status(400).json({
+                success: false,
+                message: "Incorrect old password"
+            })
+        }
+
+        console.log(oldPassword);
+
+        const isMatch = await user.matchPassword(oldPassword);
+
+        if(!isMatch){
+            return res.status(400).json({
+                success: false,
+                message: "Incorrect old password"
+            })
+        }
+
+        if(newPassword.length<6){
+            return res.status(400).json({
+                success: false,
+                message: "Invalid new password",
+            })
+        }
+        user.password = newPassword;
+
+        await user.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Password updated!"
+        })
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        })
+        return;
+    }
+}
+
+//update profile
+exports.updateProfile = async(req,res)=>{
+    try {
+        const user = await User.findById(req.user._id);
+
+        const {email,name,username,dob} = req.body;
+
+        if(email){
+            user.email = email;
+        }
+
+        if(name){
+            user.name = name;
+        }
+
+        if(dob){
+            dobnew = dob.toString()+'Z';
+            user.dob = dobnew;
+        }
+
+        if(username){
+            user.username = username;
+        }
+
+        //User Avatar : TODO
+
+        await user.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Profile updated successfully!"
+        })
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        })
     }
 }
 

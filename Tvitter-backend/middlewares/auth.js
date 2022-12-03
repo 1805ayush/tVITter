@@ -8,7 +8,7 @@ exports.isAuthenticated = async (req,res,next)=>{
         const {token} = req.cookies;
 
         if(!token){
-            res.status(401).json({
+            return res.status(401).json({
             message: "Please login first",
         })
         }
@@ -18,7 +18,7 @@ exports.isAuthenticated = async (req,res,next)=>{
         req.user = await User.findById(decoded._id);
         next(); 
     }catch(error){
-        res.status(500).json({
+        return res.status(500).json({
             message: error.message,
         })
     }

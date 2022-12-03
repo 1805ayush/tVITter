@@ -1,4 +1,5 @@
 const User = require('../models/users');
+const Post = require('../models/posts');
 
 //register user
 exports.register = async (req,res)=>{
@@ -33,7 +34,7 @@ exports.register = async (req,res)=>{
 
         const newUser = await User.create(newUserData);
 
-        const token = user.generateToken();
+        const token = newUser.generateToken();
 
         const options = {
             expire: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
@@ -197,6 +198,35 @@ exports.updateProfile = async(req,res)=>{
         return res.status(500).json({
             success: false,
             message: error.message,
+        })
+    }
+}
+
+//delete profile
+exports.deleteProfile = async (req,res)=>{
+    try {
+        
+        const user = await User.findById(req.user._id);
+        const posts = user.posts;
+        await user.remove();
+
+        for(let i = 0;i<posts.length;i++){
+            const post = await Post.findById(posts[i]);
+            await post.remove();
+        }
+
+        return res.status(200)
+            .cookie("token",null,{
+                expires: new Date(Date.now()),
+                httpOnly: true
+            }).json({
+                success:true,
+                message: "Profile deleted successfully"
+            })
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message
         })
     }
 }

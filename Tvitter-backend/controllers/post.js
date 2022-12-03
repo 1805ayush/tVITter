@@ -135,6 +135,13 @@ exports.editCaption = async(req,res)=>{
             })
         }
 
+        if(!newCaption){
+            return res.status(404).json({
+                success: false,
+                message: "Please enter a caption."
+            })
+        }
+
         if(post.user.toString() !== req.user._id.toString()){
             return res.status(401).json({
                 success: false,
@@ -179,6 +186,41 @@ exports.postsOfFollowing = async(req,res)=>{
         return res.status(500).json({
             success: false,
             message: error.message,
+        })
+    }
+}
+
+//comment on a post
+exports.comment = async(req,res)=>{
+    try {
+        const post = await Post.findById(rerq.params.id);
+
+        if(!post){
+            return res.status(404).json({
+                success: false,
+                message: "Post not found"
+            })
+        }
+
+        const user = await User.findById(req.user._id);
+
+        const comment = req.body;
+
+        post.comments.user = user;
+        post.comments.comment = comment;
+
+        await post.save();
+
+        return res.status(200).json({
+            success: true,
+            post,
+            message: "Commented successfully!"
+        })
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message
         })
     }
 }

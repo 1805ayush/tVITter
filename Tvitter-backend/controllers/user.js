@@ -231,6 +231,25 @@ exports.deleteProfile = async (req,res)=>{
     }
 }
 
+//My profile details
+exports.myProfile = async(req,res)=>{
+    try {
+        
+        const user = await User.findById(req.user._id).populate("posts followers following");
+
+        return res.status(200).json({
+            success: true,
+            user
+        })
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        })
+    }
+}
+
 //logout user
 exports.logout = async (req,res)=>{
     try {

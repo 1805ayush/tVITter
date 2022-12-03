@@ -193,7 +193,7 @@ exports.postsOfFollowing = async(req,res)=>{
 //comment on a post
 exports.comment = async(req,res)=>{
     try {
-        const post = await Post.findById(rerq.params.id);
+        const post = await Post.findById(req.params.id);
 
         if(!post){
             return res.status(404).json({
@@ -209,6 +209,7 @@ exports.comment = async(req,res)=>{
         post.comments.user = user;
         post.comments.comment = comment;
 
+        console.log(post.comments);
         await post.save();
 
         return res.status(200).json({

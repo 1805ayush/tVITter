@@ -1,6 +1,7 @@
 const Post = require("../models/posts");
 const User = require("../models/users");
 
+//create post
 exports.createPost = async (req,res)=>{
 
     try {
@@ -37,6 +38,7 @@ exports.createPost = async (req,res)=>{
 
 };
 
+//delete posts
 exports.deletePost = async(req,res)=>{
 
     try {
@@ -79,6 +81,7 @@ exports.deletePost = async(req,res)=>{
     }
 }
 
+//like and unlike posts
 exports.likeAndUnlikePost = async (req, res)=>{
     try {
         

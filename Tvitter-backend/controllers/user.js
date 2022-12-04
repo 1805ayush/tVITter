@@ -271,6 +271,43 @@ exports.myProfile = async(req,res)=>{
     }
 }
 
+//view profile of followed user
+exports.viewProfile = async (req,res)=>{
+    try {
+
+        const user = await User.findById(req.params.id).populate("posts");
+
+        const loggedInUser = await User.findById(req.user._id);
+
+        if(!user){
+            return res.status(404).json({
+                success: false,
+                message: "Profile not found"
+            })
+        }
+
+        console.log(user.followers);
+        if(!user.followers.includes(loggedInUser._id)){
+            const username = user.username;
+            return res.status(400).json({
+                success: false,
+                message: "Please follow to view their posts."
+            })
+        }else{
+            console.log(user);
+            return res.status(200).json({
+                success: true,
+                user
+            })
+        }
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        })
+    }
+}
+
 //logout user
 exports.logout = async (req,res)=>{
     try {

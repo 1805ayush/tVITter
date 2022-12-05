@@ -207,10 +207,12 @@ exports.comment = async(req,res)=>{
 
         const user = await User.findById(req.user._id);
 
-        const comment = req.body;
+        const comment = req.body.comment;
 
-        post.comments.user = user;
-        post.comments.comment = comment;
+        post.comments.push({
+            user: user,
+            comment: comment,
+        })
 
         console.log(post.comments);
         await post.save();
@@ -227,4 +229,52 @@ exports.comment = async(req,res)=>{
             message: error.message
         })
     }
+}
+
+//edit comment
+exports.editComment = async (req,res)=>{
+
+    try {
+
+        const posts = await Post.find({}).populate("comments");
+
+        let foundComment = false;
+
+        let commentIndex;
+        let postIndex;
+
+        posts.forEach((post,pindex)=>{
+            post.comments.forEach((comment,cindex)=>{
+                if(comment._id.toString()===req.params.id.toString()){
+                    foundComment=true;
+                    postIndex = pindex;
+                    commentIndex = cindex; 
+                }
+            })
+        });
+
+
+        if(foundComment){
+            const oldcomment = posts[postIndex].comments[commentIndex];
+            oldcomment.comment = req.body.newComment;
+            await posts[postIndex].save();
+
+            return res.status(200).json({
+                success: true,
+                comment: "Edited comment!"
+            })
+        }else{
+            return res.status(404).json({
+                success: false,
+                message: "Comment not found"
+            })
+        }
+        
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        })
+    }
+
 }

@@ -278,3 +278,48 @@ exports.editComment = async (req,res)=>{
     }
 
 }
+
+//delete comment
+exports.deleteComment = async(req,res)=>{
+    try {
+        const posts = await Post.find({}).populate("comments");
+
+        let foundComment = false;
+
+        let commentIndex;
+        let postIndex;
+
+        posts.forEach((post,pindex)=>{
+            post.comments.forEach((comment,cindex)=>{
+                if(comment._id.toString()===req.params.id.toString()){
+                    foundComment=true;
+                    postIndex = pindex;
+                    commentIndex = cindex; 
+                }
+            })
+        });
+
+
+        if(foundComment){
+            posts[postIndex].comments.splice(commentIndex);
+            await posts[postIndex].save();
+
+            return res.status(200).json({
+                success: true,
+                comment: "Deleted comment!"
+            })
+        }else{
+            return res.status(404).json({
+                success: false,
+                message: "Comment not found"
+            })
+        }
+        
+        
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        })
+    }
+}

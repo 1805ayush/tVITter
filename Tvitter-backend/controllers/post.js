@@ -240,6 +240,7 @@ exports.editComment = async (req,res)=>{
 
         let foundComment = false;
 
+        
         let commentIndex;
         let postIndex;
 
@@ -286,13 +287,19 @@ exports.deleteComment = async(req,res)=>{
 
         let foundComment = false;
 
+
         let commentIndex;
         let postIndex;
+        let isAuthorized = false;
 
         posts.forEach((post,pindex)=>{
             post.comments.forEach((comment,cindex)=>{
                 if(comment._id.toString()===req.params.id.toString()){
                     foundComment=true;
+                    if(comment.user._id.toString()===req.user._id.toString() ||
+                             post.user._id.toString()=== req.user._id.toString()){
+                                isAuthorized = true;
+                    }
                     postIndex = pindex;
                     commentIndex = cindex; 
                 }
@@ -300,8 +307,8 @@ exports.deleteComment = async(req,res)=>{
         });
 
 
-        if(foundComment){
-            posts[postIndex].comments.splice(commentIndex);
+        if(foundComment && isAuthorized){
+            posts[postIndex].comments.splice(commentIndex,1);
             await posts[postIndex].save();
 
             return res.status(200).json({
@@ -309,10 +316,19 @@ exports.deleteComment = async(req,res)=>{
                 comment: "Deleted comment!"
             })
         }else{
-            return res.status(404).json({
-                success: false,
-                message: "Comment not found"
-            })
+            if(!foundComment){
+                return res.status(404).json({
+                    success: false,
+                    message: "Comment not found"
+                })
+            } 
+            if(!isAuthorized){
+                return res.status(404).json({
+                    success: false,
+                    message: "Not authorized"
+                })
+            }
+            
         }
         
         

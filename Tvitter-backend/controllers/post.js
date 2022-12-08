@@ -283,6 +283,7 @@ exports.editComment = async (req,res)=>{
 //delete comment
 exports.deleteComment = async(req,res)=>{
     try {
+
         const posts = await Post.find({}).populate("comments");
 
         let foundComment = false;
@@ -338,4 +339,4 @@ exports.deleteComment = async(req,res)=>{
             message: error.message,
         })
     }
-}
+} 

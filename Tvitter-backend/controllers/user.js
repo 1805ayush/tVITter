@@ -1,5 +1,6 @@
 const User = require('../models/users');
 const Post = require('../models/posts');
+const {sendEmail} = require('../middlewares/sendEmail');
 
 //register user
 exports.register = async (req,res)=>{
@@ -251,6 +252,67 @@ exports.deleteProfile = async (req,res)=>{
         })
     }
 }
+
+//forgot password
+exports.forgotPassword = async(req,res)=>{
+
+    try {
+
+        const email = req.body.email;
+        const user = await User.findOne({email});
+
+        if(!user){
+            return res.status(404).json({
+                success: false,
+                message: "Invalid email"
+            })
+        }
+
+        const resetToken = await user.generateResetPasswordToken();
+
+        await user.save();
+
+        const resetURL = `${req.protocol}://${req.get("host")}/api/v1/password/reset/${resetToken}`;
+
+
+        const message = `Please click on the link to reset your password: \n\n ${resetURL}`;
+
+        try {
+            
+            await sendEmail({
+                email: user.email,
+                subject: "Reset Password for tVITter",
+                message: message,
+            });
+
+            return res.status(200).json({
+                success: true,
+                message: `Email sent to ${email}`
+            })
+
+        } catch (error) {
+            user.resetPasswordToken= undefined;
+            user.resetPasswordTokenExpire= undefined;
+
+            await user.save();
+
+            return res.status(500).json({
+                success: false,
+                messsage: error.message,
+            })
+        }
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        })
+    }
+}
+
+//reset password
+
+
 
 //My profile details
 exports.myProfile = async(req,res)=>{

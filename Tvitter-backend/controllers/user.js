@@ -312,6 +312,43 @@ exports.forgotPassword = async(req,res)=>{
 }
 
 //reset password
+exports.resetPassword = async(req,res)=>{
+    try {
+        
+        const resetPasswordToken = crypto.createHash("sha256").update(req.params.token).digest("hex");
+
+        const user =await User.findOne({
+            resetPasswordToken,
+            resetPasswordTokenExpire: {$gt: Date.now()}
+        });
+
+        if(!user){
+            return res.status(401).json({
+                success: false,
+                message: "Token is invalid or has expired"
+            })
+        }
+
+        user.password = req.body.password;
+
+        user.resetPasswordToken = undefined,
+        user.resetPasswordTokenExpire = undefined,
+
+        await user.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Password Updated successfully!"
+        })
+
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        })
+    }
+}
 
 
 
@@ -382,45 +419,6 @@ exports.logout = async (req,res)=>{
                 success: true,
                 message: "Logged Out Successfully"
             })
-
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: error.message
-        })
-    }
-}
-
-//reset password
-exports.resetPassword = async(req,res)=>{
-    try {
-        
-        const resetPasswordToken = crypto.createHash("sha256").update(req.params.token).digest("hex");
-
-        const user =await User.findOne({
-            resetPasswordToken,
-            resetPasswordTokenExpire: {$gt: Date.now()}
-        });
-
-        if(!user){
-            return res.status(401).json({
-                success: false,
-                message: "Token is invalid or has expired"
-            })
-        }
-
-        user.password = req.body.password;
-
-        user.resetPasswordToken = undefined,
-        user.resetPasswordTokenExpire = undefined,
-
-        await user.save();
-
-        return res.status(200).json({
-            success: true,
-            message: "Password Updated successfully!"
-        })
-
 
     } catch (error) {
         return res.status(500).json({

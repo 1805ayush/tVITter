@@ -3,10 +3,8 @@ const User = require("../models/users");
 
 //create post
 exports.createPost = async (req,res)=>{
+    try { 
 
-    try {
-        
-       
         const newPostData = {
             caption : req.body.caption,
             image:{
@@ -14,6 +12,7 @@ exports.createPost = async (req,res)=>{
                 url: "req.body.url"
             },
             user : req.user._id,
+            parentPost: undefined,
         }
 
         const newPost = await Post.create(newPostData);
@@ -58,16 +57,33 @@ exports.deletePost = async(req,res)=>{
             })
         }
 
+        const parentPost = post.parentPost;
+
+        const replies = post.replies;
 
         await post.remove();
 
         const user = await User.findById(req.user._id);
-
         const index = user.posts.indexOf(req.params.id);
-
         user.posts.splice(index,1);
-
         await user.save();
+
+        if(parentPost){
+            const parent = await Post.findById(parentPost);
+            const parentIndex = parent.replies.indexOf(req.params.id);
+            parent.replies.splice(parentIndex,1);
+            await parent.save();
+        }
+        
+
+        if(replies){
+            for(i=0;i<replies.length;i++){
+                const reply = await Post.findById(replies[i]);
+                reply.parentPost = undefined;
+                await reply.save();
+            }
+        }
+        
 
         return res.status(200).json({
             success:true,
@@ -340,3 +356,46 @@ exports.deleteComment = async(req,res)=>{
         })
     }
 } 
+
+//reply to a post
+exports.replyToPost = async(req,res)=>{
+
+    try {
+
+        const newReplyData = {
+            caption : req.body.caption,
+            image:{
+                publicID:"req.body.publicId",
+                url: "req.body.url"
+            },
+            user : req.user._id,
+            parentPost: req.params.id,
+        }
+        
+        const newReply = await Post.create(newReplyData);
+
+        const post = await Post.findById(req.params.id);
+
+        const user = await User.findById(req.user._id);
+
+        post.replies.push(newReply._id);
+
+        user.posts.push(newReply._id);
+
+        await user.save();
+
+        await post.save();
+
+        return res.status(201).json({
+            success:true,
+            post: newReply,
+        })
+        
+    } catch (error) {
+        return res.status(500).json({
+            success:false,
+            message: error.message
+        })        
+    }
+
+}

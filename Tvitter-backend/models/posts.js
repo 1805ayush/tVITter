@@ -38,12 +38,17 @@ const postSchema = new mongoose.Schema({
         }
     ],
 
+    parentPost:{
+        type: mongoose.Schema.Types.ObjectID,
+        ref: "Post"
+    },
+
     replies: [
         {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Post"
         }
-    ]
+    ],
       
 });
 
